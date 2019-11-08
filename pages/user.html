@@ -1,0 +1,648 @@
+<style>
+	.user_tip{
+		width: 100%;
+	}
+	.user_tip,
+	.user_label,
+	.user_addBtns{
+		height: 50px;
+		line-height: 50px;
+	}
+	.user_label{
+		width: 170px;
+		float:left;
+		border-top: 3px solid #3366ff;
+		background-color: #fff;
+		color: #000;
+	}
+	.user_addBtns{
+		float: right;
+		width: 220px;
+	}
+	.btn_add,
+	.btn_addAll{
+		width: 100px;
+		height: 30px;
+		line-height: 30px;
+		border-radius: 3px;
+		background-color: #ff6600;
+		margin-top: 10px;
+		margin-left: 10px;
+		box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3490);
+		cursor: pointer;
+	}
+	.btn_addAll{
+		background-color: #66a5f3;
+	}
+	.btn_add span,
+	.btn_addAll span{
+		font-size: 14px;
+		color: #fff;
+		margin-left: 5px;
+		font-weight: 700;
+		line-height: 30px;
+	}
+	.btn_add img,
+	.btn_addAll img{
+		margin-left: 5px;
+	}
+	.user_list{
+		width: 100%;
+		background-color: #fff;
+	}
+	.user_btns select:focus{
+		box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.25);
+	}
+	.input_key{
+		margin-left: 30% !important;
+	}
+	.input_keyname img{
+		width: 15px;
+		height: 15px;
+		margin-right: 5px
+	}
+	.input_keyname{
+		border: 1px solid #ededed;
+		border-left: 0;
+		line-height: 35px;
+	}
+	.input_keyname input{
+		border: 0;
+		height: 30px;
+		line-height: 38px;
+	}
+	.user_btns,
+	.user_content{
+		width: 100%;
+	}
+	.btn_delAll{
+		padding: 5px !important;
+	}
+	.btn:focus{
+		box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.25) !important;
+	}
+	.btn_del,
+	.btn_upd{
+		text-decoration: underline;
+	}
+	.btn_del,
+	.btn_upd{
+		color: #000;
+	}
+	.btn_upd{
+		margin-right: 10px;
+	}
+	table{
+		width: 1058.33px !important;
+		table-layout:fixed;
+	}
+	td{
+		overflow:hidden;
+		width:110px !important;
+		text-overflow:ellipsis !important;
+		white-space:nowrap !important;
+	}
+	#userModalLabel{
+		color: #000;
+	}
+	#userModalLabel{
+		font-size: 16px;
+	}
+	div[name=dangerDiv]{
+		height: 24px;
+	}
+	span.dangermsg{
+		color: red;
+		font-size: 14px;
+	}
+</style>
+
+<script>
+	var baseURL = "http://203.195.246.58:7777";
+	var tables;
+
+	// 初始化加载数据
+	function loadData(){
+		// 接口地址
+		var url = baseURL+"/Jobhunter/findAll";
+		// 使用ajax方法获取数据
+		$.get(url,function(response){
+			if (response.status == 200) {
+				// 1. 使用全局变量存放数据，方便加载检索选项
+				allData = response.data;
+		    	// 2. 使用封装好的函数渲染数据
+				foreachData(response.data);			
+			}else{
+				// 响应状态不成功则显示接口有问题
+				alert("接口异常");
+			}
+		});
+	}
+
+	// 封装分页渲染列表数据的函数
+	function foreachData(data){
+		// 2. 如果已经有数据了先清空再重新加载
+		if ($('#user_tbl').hasClass('dataTable')) {
+			var dttable = $('#user_tbl').dataTable();
+			dttable.fnClearTable(); //清空一下table
+			dttable.fnDestroy(); //还原初始化了的datatable
+		}
+		// 使用插件datatables渲染数据并分页
+		tables = $('#user_tbl').DataTable({
+			"retrieve": true,
+			"ordering":false,//取消默认排序
+			"bLengthChange": false, //开关，是否显示每页显示多少条数据的下拉框
+			'iDisplayLength': 7, //每页初始显示7条记录
+			'bFilter': false,  //是否使用内置的过滤功能（是否去掉搜索框）
+			"bInfo": false, //开关，是否显示表格的一些信息(当前显示XX-XX条数据，共XX条)
+			"bPaginate": true, //开关，是否显示分页器
+			"bSort": false, //是否可排序 
+			"bProcessing" : true, //开启读取服务器数据时显示正在加载中……特别是大数据量的时候，开启此功能比较好
+			"data" :data, 
+			//使用对象数组，一定要配置columns，告诉 DataTables 每列对应的属性
+			//data 这里是固定不变的，name，position，salary，office 为你数据里对应的属性
+			"columns" : [
+				{ 
+					// 定义操作列,
+					targets : 0,//操作按钮目标列
+					data : 'id',
+					"orderable":false,
+					render : function(data, type,row) {
+						var html = '<input class="text-center" type="checkbox" value="'+data+'">';
+						return html;
+					}
+				},
+				{ data: 'username' },
+				{ data: 'realname' },
+				{ data: 'telephone' },
+				{ data: 'gender' },
+				{ data: 'birth' },
+				{ data: 'education' },
+				{
+					// 定义操作列,
+					targets : 6,//操作按钮目标列
+					data : null,
+					render : function(data, type,row) {
+						var html = '<a id="btn_upd" class="btn_upd text-center" href="javascript:void(0)">修改</a>';
+						html += '<a id="btn_del" class="btn_del text-center" href="javascript:void(0)">删除</a>';
+						return html;
+					}
+				}
+			]
+		});
+
+	}
+
+	// 根据id删除数据
+	function deleteByid(id){
+		var url = "/Jobhunter/deleteById";
+		// get请求方式的数据必须为对象传递
+		var data = {id:id};
+		// 调用jQuery的ajax方法删除一条记录并初始化数据
+		$.post(baseURL+url,data,function(response){
+			// 重载数据
+			loadData();
+		});
+	}
+
+	// 根据id查询数据
+	function selectByid(id){
+		var url = "/Jobhunter/findById";
+		// get请求方式的数据必须为对象传递
+		var data = {id:id};
+		// 调用jQuery的ajax方法删除一条记录并初始化数据
+		$.get(baseURL+url,data,function(response){
+			// 将数据放置到表单中
+			$("#user_updModal input[name=id]").attr("value",id);// id
+    		$("input#input_name").val(response.data.username);//用户名
+    		$("input#input_realname").val(response.data.realname);//真名
+    		$("#input_gender").children("option").each(function(){
+	    		// 判断性别选择
+	    		if ($(this).val() == response.data.gender) {
+	    			$(this).attr("selected",true);
+	    		}
+    		});
+    		$("input#input_birth").val(response.data.birth);//出生日期
+    		$("input#input_telephone").val(response.data.telephone);//联系方式
+    		$("input#input_password").val(response.data.password);//密码
+    		$("#input_education").children("option").each(function(){
+    			// 判断学历选择
+    			if ($(this).val() == response.data.education) {
+    				$(this).attr("selected",true);
+    			}
+    		});
+	    	$("#input_currentStatus").children("option").each(function(){
+	    		// 判断求职状态选择
+	    		if ($(this).val() == response.data.currentStatus) {
+	    			$(this).attr("selected",true);
+	    		}
+	    	});
+	    	$("input#input_workTime").val(response.data.workTime);//工作时间
+	    	$("input#input_resume").val(response.data.resume);//简历
+		});
+	}
+
+	$(function(){
+		// 初始化加载数据
+		loadData();
+
+		// 为单个删除、修改、详情按钮绑定事件
+		$("#user_tbl").on("click","a",function(){
+			// 2.获取需要删除的id
+			var id = $(this).parents("tr").find("input").val();
+			switch(this.id){
+				case "btn_del":
+					// 为删除按钮绑定事件
+					
+					// 调用删除函数删除
+					deleteByid(id);
+					alert("删除成功");
+					break;
+				case "btn_upd":
+					//  查询获取数据放到模态框中
+					selectByid(id,"btn_upd");
+					//  显示模态框
+					$("#userModal").modal("show");
+					break;
+			}
+			event.preventDefault();
+		});
+
+		// 为批量删除按钮绑定事件
+		$("button#btn_allDel").click(function(){
+			$("#user_tbl>tbody input[type=checkbox]:checked").map(function(index,item){
+			 	deleteByid($(item).val());
+			}).toArray();
+			alert("删除成功");
+
+		});
+
+		// 为单个添加按钮绑定事件
+		$("#btn_add").click(function(){
+			// 1.显示模态框
+			$("#userModal").modal('show');
+		})
+
+		// 监听模态框的关闭清除表单中的数据
+		$('#userModal').on('hidden.bs.modal', function (e) {
+			$(this).find("form")[0].reset();
+			// 清除表单的id值
+			$("input[name=id]").val("");
+			// 清除表单中的错误信息
+			$("[name=dangerDiv]").children().remove();
+		});
+
+		//为保存按钮绑定事件
+		$("#user_commit").click(function(){
+			//1. 获取输入框的值
+			var id = $("#user_updModal input[name=id]").val();// id
+			var username = $("input#input_name").val();//用户名
+			var realname = $("input#input_realname").val();//真名
+			var gender = $("#input_gender").val();//性别
+			var birth = $("input#input_birth").val();//出生日期
+			var telephone = $("input#input_telephone").val();//联系方式
+			var password = $("input#input_password").val();//密码
+			var education = $("#input_education").val();//学历
+			var currentStatus = $("#input_currentStatus").val();//求职状态
+			var workTime = $("input#input_workTime").val();//工作时间
+			var resume = $("input#input_resume").val();//简历
+
+			var data;
+			if (id) {
+				// 有id  修改
+				data = {
+					id : id,
+					birth : birth,
+					currentStatus : currentStatus,
+					education : education,
+					gender : gender,
+					password : password,
+					realname : realname,
+					resume : resume,
+					telephone : telephone,
+					username : username,
+					workTime : workTime
+				};
+			}else{
+				// 没有id 保存
+				data = {
+					birth : birth,
+					currentStatus : currentStatus,
+					education : education,
+					gender : gender,
+					password : password,
+					realname : realname,
+					resume : resume,
+					telephone : telephone,
+					username : username,
+					workTime : workTime
+				}
+			}
+    		// 提交数据
+			$.post(baseURL+"/Jobhunter/saveOrUpdate",data,function(result){
+				if (result.status === 200) {
+				// 修改成功 隐藏模态框
+    			$("#userModal").modal("hide");
+    			// 重载数据
+    			loadData();
+    			// 显示成功的信息
+    			alert("更新成功");
+				}	
+			});
+			event.preventDefault();
+		})
+
+		// 为学历检索选项框绑定事件
+		$('#select_education').change(function() {
+		  var value = $(this).val();
+		  if (value != 0) {
+		  	// 当选择了应有的选项之后执行查找数据
+		  	var data = {education:value};
+		  	// 筛选相应数据
+			$.get(baseURL+"/Jobhunter/findByEducation",data,function(result){
+				if (result.status === 200) {
+					foreachData(result.data);
+				}else{
+					alert("接口异常");
+				}		
+			});
+		  }else{
+		  	// 如果选中的是没有的选项则显示全部数据
+		  	loadData();
+		  }
+		});
+
+		// 为性别检索选项框绑定事件
+		$('#select_gender').change(function() {
+		  var value = $(this).val();
+		  if (value != 0) {
+		  	// 当选择了应有的选项之后执行查找数据
+		  	var data = {gender:value};
+		  	// 筛选相应数据
+			$.get(baseURL+"/Jobhunter/findByGender",data,function(result){
+				if (result.status === 200) {
+					foreachData(result.data);
+					alert("筛选成功");
+				}else{
+					alert("接口异常");
+					// addAlert("alert-danger","接口异常!");
+				}		
+			});
+		  }else{
+		  	// 如果选中的是没有的选项则显示全部数据
+		  	loadData();
+		  }
+		});
+		
+
+	});
+
+</script>
+
+<div class="user">
+	<!-- 标题 -->
+	<div class="user_tip">
+		<div class="user_label text-center">
+			用户列表
+		</div>
+		<!-- 添加按钮 -->
+		<div class="user_addBtns">
+			<div id="btn_add" class="btn_add float-left">
+				<img src="./images/u148.png">
+				<span>添加用户</span>
+			</div>
+			<div class="btn_addAll float-right">
+				<img src="./images/u148.png">
+				<span>导入用户</span>
+			</div>
+		</div>
+	</div>
+
+	<!-- 内容 -->
+	<div class="user_list">
+		
+		<!-- 检索按钮-->
+		<div class="user_btns row py-3">
+			<!-- 学历 -->
+			<div class="input-group col-2 ml-4">
+				<select id="select_education" class="custom-select select_education" >
+				    <option value="0" selected>学历</option>
+				    <option value="初中及以下">初中及以下</option>
+				    <option value="高中">高中</option>
+				    <option value="中技">中技</option>
+				    <option value="中专">中专</option>
+				    <option value="大专">大专</option>
+				    <option value="本科">本科</option>
+				    <option value="硕士">硕士</option>
+				    <option value="MBA">MBA</option>
+				    <option value="博士">博士</option>
+				</select>
+			</div>
+			<!-- 性别 -->
+			<div class="input-group col-2 ml-1">
+				<select id="select_gender" class="custom-select select_gender" >
+				    <option value="0" selected>性别</option>
+				    <option value="男">男</option>
+				    <option value="女">女</option>
+				</select>
+			</div>
+
+			<!-- 关键字 -->
+			<div class="input-group col-4 input_key">
+				<select class="custom-select select_username float-left" width="20%">
+				    <option value="姓名" selected>姓名</option>
+				</select>
+				<div class="float-left input_keyname"><input id="" type="text" name=""><img src="./images/u138.png"></div>
+				
+			</div>
+		</div>
+
+		<!-- 列表内容 -->
+		<div class="user_content">
+			<table id="user_tbl" class="table table-striped">
+			  <thead>
+			    <tr>
+			      <th width="50px">#</th>
+			      <th>用户名</th>
+			      <th>姓名</th>
+			      <th>手机号</th>
+			      <th>性别</th>
+			      <th>出生年月</th>
+			      <th>最高学历</th>
+			      <th>操作</th>
+			    </tr>
+			  </thead>
+			</table>
+
+			<div class="btn_delAll"><button type="button" class="btn btn-danger" id="btn_allDel">批量删除</button></div>
+		</div>
+
+	</div>
+
+	<!-- Modal模态框 -->
+	<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-lg" role="document">
+
+	    <!-- 修改显示信息 -->
+	    <div id="user_updModal" class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="userModalLabel">添加/修改用户信息</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	      	<!-- 表单 -->
+					<form>
+						<!-- 存放信息id的 -->
+						<input type="hidden" name="id" value="">
+						<!-- 第一行 -->
+						<div class="form-group row">
+							<!-- 用户名 -->
+							<div class="col-6">
+								<div class="row">
+									<label for="input_name" class="col-4 text-center pr-0"><span class="dangermsg">* </span>用户名</label>
+									<div class="col-8 pl-0">
+										<input id="input_name" class="form-control form-control-sm" type="text">
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+							<!-- 真实姓名 -->
+							<div class="col-6 pr-5">
+								<div class="row">
+									<label for="input_realname" class="col-4 text-center pr-0"><span class="dangermsg">* </span>真实姓名</label>
+									<div class="col-8 pl-0">
+										<input id="input_realname" class="form-control form-control-sm" type="text">
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+						</div>
+						<!-- 第二行 -->
+						<div class="form-group row">
+							<!-- 性别 -->
+							<div class="col-6">
+								<div class="row">							
+									<label for="input_gender" class="col-4 text-center pr-0"><span class="dangermsg">* </span>性别</label>
+									<div class="col-8 pl-0">
+										<select id="input_gender" class="form-control">
+									    <option selected>性别</option>
+									    <option value="男">男</option>
+									    <option value="女">女</option>
+									</select>
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+							<!-- 出生日期 -->
+							<div class="col-6 pr-5">
+								<div class="row">
+									<label for="input_birth" class="col-4 text-center pr-0"><span class="dangermsg">* </span>出生日期</label>
+									<div class="col-8 pl-0">
+										<input id="input_birth" class="form-control form-control-sm" type="text">
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+						</div>
+
+						<!-- 第三行 -->
+						<div class="form-group row">
+							<!-- 手机号 -->
+							<div class="col-6">
+								<div class="row">
+									<label for="input_telephone" class="col-4 text-center pr-0"><span class="dangermsg">* </span>联系方式</label>
+									<div class="col-8 pl-0">
+										<input id="input_telephone" class="form-control form-control-sm" type="text">
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+							<!-- 密码 -->
+							<div class="col-6 pr-5">
+								<div class="row">							
+									<label for="input_password" class="col-4 text-center pr-0"><span class="dangermsg">* </span>密码</label>
+									<div class="col-8 pl-0">
+										<input id="input_password" class="form-control form-control-sm" type="password">
+										</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+							
+						</div>
+
+						<!-- 第四行 -->
+						<div class="form-group row">
+							<!-- 学历 -->
+							<div class="col-6">
+								<div class="row">
+									<label for="input_education" class="col-4 text-center pr-0"><span class="dangermsg">* </span>最高学历</label>
+									<div class="col-8 pl-0">
+										<select id="input_education" class="form-control">
+											<option selected>请选择学历</option>
+											<option value="初中及以下">初中及以下</option>
+									    <option value="高中">高中</option>
+									    <option value="中技">中技</option>
+									    <option value="中专">中专</option>
+									    <option value="大专">大专</option>
+									    <option value="本科">本科</option>
+									    <option value="硕士">硕士</option>
+									    <option value="MBA">MBA</option>
+									    <option value="博士">博士</option>
+										</select>
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+							<!-- 求职状态 -->
+							<div class="col-6 pr-5">
+								<div class="row">
+									<label for="input_currentStatus" class="col-4 text-center pr-0"><span class="dangermsg">* </span>求职状态</label>
+									<div class="col-8 pl-0">
+										<select id="input_currentStatus" class="form-control">
+											<option selected>请选择求职状态</option>
+											<option value="在职">在职</option>
+									    <option value="待业">待业</option>
+									    <option value="在职换岗">在职换岗</option>
+										</select>
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+						</div>
+
+						<!-- 第五行 -->
+						<div class="form-group row">
+							<!-- 工作时间 -->
+							<div class="col-6">
+								<div class="row">
+									<label for="input_workTime" class="col-4 text-center pr-0"><span class="dangermsg">* </span>工作时间</label>
+									<div class="col-8 pl-0">
+										<input id="input_workTime" class="form-control form-control-sm" type="text">
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+							<!-- 简历 -->
+							<div class="col-6 pr-5">
+								<div class="row">
+									<label for="input_resume" class="col-4 text-center pr-0">简历</label>
+									<div class="col-8 pl-0">
+										<input id="input_resume" class="form-control form-control-sm" type="text">
+									</div>
+								</div>
+							</div>
+						</div>
+
+					</form>
+	      	<!-- 表单结束 -->
+	      </div>
+	      <div class="modal-footer">
+	        <button id="close" type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+	        <button id="user_commit" type="button" class="btn btn-primary">保存</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+</div>

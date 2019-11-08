@@ -1,0 +1,322 @@
+<style>
+	.JobInformation_tip{
+		width: 170px;
+		height: 50px;
+		line-height: 50px;
+		border-top: 3px solid #3366ff;
+		background-color: #fff;
+		color: #000;
+	}
+	.JobInformation_list{
+		width: 100%;
+		background-color: #fff;
+	}
+	.JobInformation_btns select:focus{
+		box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.25);
+	}
+	.JobInformation_btns,
+	.JobInformation_content{
+		width: 100%;
+	}
+	.btn_mess{
+		text-decoration: underline;
+	}
+	table{
+		width: 1058.33px !important;
+		table-layout:fixed;
+	}
+	td{
+		overflow:hidden;
+		width:110px !important;
+		text-overflow:ellipsis !important;
+		white-space:nowrap !important;
+	}
+	#JobInformationModalLabel{
+		color: #000;
+	}
+	#JobInformationModalLabel{
+		font-size: 16px;
+	}
+	.JobhunterData_title{
+		width: 65px;
+		height: 30px;
+		line-height: 30px;
+		color: #fff;
+		background-color: #3d9af8;
+	}
+	.notContact{
+		width: 50px;
+		line-height: 25px;
+		background-color: black;
+		height: 25px;
+		color: #fff;
+	}
+	#JobInformationModal span,
+	#JobInformationModal h5{
+		color:#666666;
+		font-weight: bold;	
+	}
+
+</style>
+
+<script>
+	var baseURL = "http://203.195.246.58:7777";
+	var JobInformationData = [];//需要渲染的求职信息
+	var tables;
+	var employmentData;//存放招聘信息
+	var employmentAllData;//存放所有招聘信息
+	var JobhunterData;//存放求职者信息
+	var JobhunterAllData;//存放求职者所有信息
+
+	// 初始化加载数据
+	function loadData(){
+		// 接口地址
+		var url = baseURL+"/EmploymentJobhunter/findAll";
+
+		// 使用ajax方法获取数据
+		$.get(url,function(response){
+			if (response.status == 200) {
+
+				// 1. 遍历获取到的求职信息
+				response.data.forEach(function(item){
+					// 2. 根据求职者id查询求职者信息
+					selectByJobhunterId(item.jobhunterId);
+					// 3. 根据招聘信息id查询招聘信息
+					selectByemploymentId(item.employmentId);
+					// 4. 封装好需要渲染的数据
+					var obj = {
+						id : item.jobhunterId,
+						realname : JobhunterData.realname,
+						telephone : JobhunterData.telephone,
+						title : employmentData.title,
+						time : item.askTime
+					}
+					JobInformationData.push(obj);
+				});
+
+				// 3. 使用封装好的函数渲染数据
+				foreachData(JobInformationData);
+							
+			}else{
+				// 响应状态不成功则显示接口有问题
+				alert("接口异常");
+			}
+		});
+
+	}
+
+	// 封装分页渲染列表数据的函数
+	function foreachData(data){
+		// 1. 如果已经有数据了先清空再重新加载
+		if ($('#JobInformation_tbl').hasClass('dataTable')) {
+	    var dttable = $('#JobInformation_tbl').dataTable();
+	    dttable.fnClearTable(); //清空一下table
+	    dttable.fnDestroy(); //还原初始化了的datatable
+	  }
+
+		// 使用插件datatables渲染数据并分页
+		tables = $('#JobInformation_tbl').DataTable({
+			"retrieve": true,
+			"ordering":false,//取消默认排序
+			"bLengthChange": false, //开关，是否显示每页显示多少条数据的下拉框
+			'iDisplayLength': 7, //每页初始显示7条记录
+			'bFilter': false,  //是否使用内置的过滤功能（是否去掉搜索框）
+			"bInfo": false, //开关，是否显示表格的一些信息(当前显示XX-XX条数据，共XX条)
+			"bPaginate": true, //开关，是否显示分页器
+			"bSort": false, //是否可排序 
+			"bProcessing" : true, //开启读取服务器数据时显示正在加载中……特别是大数据量的时候，开启此功能比较好
+			"data" : data, 
+			//使用对象数组，一定要配置columns，告诉 DataTables 每列对应的属性
+			//data 这里是固定不变的，name，position，salary，office 为你数据里对应的属性
+			"columns" : [
+				{ 
+					// 定义操作列,
+					targets : 0,//操作按钮目标列
+					data : 'id',
+					"orderable":false,
+					render : function(data, type,row) {
+						var html = '<input class="text-center" type="checkbox" value="'+data+'" checkbox="false">';
+						return html;
+					}
+				},
+				{ data: 'realname' },
+				{ data: 'telephone' },
+				{ data: 'title' },
+				{
+					// 定义操作列,
+					targets : 4,//操作按钮目标列
+					data : null,
+					render : function(data, type,row) {
+						var html = '<a id="btn_mess" class="btn_mess text-center" href="javascript:void(0);">查看</a>';
+						return html;
+					}
+				},
+				{ data: 'time' }
+			]
+		});
+
+	}
+
+	// 查询所有求职者数据
+	function selectByJobhunterAll(){
+		var url = "/Jobhunter/findAll";
+		// 5.调用jQuery的ajax方法删除一条记录并初始化数据
+		$.ajaxSettings.async = false;//同步请求
+		$.get(baseURL+url,function(response){
+			// 获取对应的求职者信息
+			JobhunterAllData = response.data;
+		});
+	}
+
+	// 查询所有招聘信息数据
+	function selectByemploymentAll(){
+		var url = "/Employment/findAll";
+		// 5.调用jQuery的ajax方法删除一条记录并初始化数据
+		$.ajaxSettings.async = false;//同步请求
+		$.get(baseURL+url,function(response){
+			// 获取对应的招聘信息
+			employmentAllData = response.data;
+		});
+	}
+
+
+	// 根据求职者id查询数据
+	function selectByJobhunterId(id){
+		JobhunterAllData.forEach(function(item){
+			// 通过遍历所有求职者信息匹配id找到数据
+			if (item.id == id) {
+				JobhunterData = item;
+				return;
+			}
+		});
+	}
+
+	// 根据招聘信息id查询数据
+	function selectByemploymentId(id){
+		employmentAllData.forEach(function(item){
+			// 通过遍历所有求招聘信息匹配id找到数据
+			if (item.id == id) {
+				employmentData = item;
+				return;
+			}
+		});
+	}
+
+	$(function(){
+		// 获取求职者信息
+		selectByJobhunterAll();
+		// 获取所有招聘信息
+		selectByemploymentAll();
+		// 初始化加载数据
+		loadData();
+		
+
+		// 1.为详情按钮绑定事件
+		$("#JobInformation_tbl").on("click","a",function(){
+			// 2.获取需要删除的id
+			var id = $(this).parents("tr").find("input").val();
+			// console.log(id);
+			// 查询对应的求职者信息
+			selectByJobhunterId(id);
+			// 将数据放到模态框中
+			$("#JobInformationModalLabel").text(JobhunterData.realname);//姓名
+			$("#JobhunterData_gender").text(JobhunterData.gender);//性别
+			$("#JobhunterData_education").text(JobhunterData.education);//学历
+			$("#JobhunterData_birth").text(JobhunterData.birth);//出生日期
+			$("#JobhunterData_workTime").text(JobhunterData.workTime);//工作经验
+
+			$("#JobInformationModal").modal("show");
+			event.preventDefault();
+		});	
+
+	});
+
+</script>
+
+<div class="JobInformation">
+	<!-- 选项卡 -->
+
+	<!-- 标题 -->
+	<div class="JobInformation_tip text-center">
+		求职联系
+	</div>
+
+	<!-- 内容 -->
+	<div class="JobInformation_list">
+		
+		<!-- 联系未联系按钮-->
+		<div class="JobInformation_btns py-3">
+			<div class="notContact ml-3 px-1">未联系</div>
+		</div>
+
+		<!-- 列表内容 -->
+		<div class="JobInformation_content">
+			<table id="JobInformation_tbl" class="table table-striped">
+			  <thead>
+			    <tr>
+			      <th width="60px">#</th>
+			      <th>求职人</th>
+			      <th>联系方式</th>
+			      <th>求职岗位</th>
+			      <th>简历</th>
+			      <th>申请时间</th>
+			    </tr>
+			  </thead>
+			</table>
+		</div>
+
+	</div>
+
+	<!-- Modal模态框 -->
+	<div class="modal fade" id="JobInformationModal" tabindex="-1" role="dialog" aria-labelledby="JobInformationModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+
+	  	<!-- 详情显示信息 -->
+	    <div id="JobInformation_messModal" class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title messLabel" id="JobInformationModalLabel"></h5>
+	        
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        <!-- 第一行 -->
+	        <div class="my-2 px-1 JobhunterData_title">
+	        	个人信息
+	        </div>
+	        <!-- 第二行 -->
+	        <div class="row py-2">
+	        	<!-- 性别 -->
+	        	<div class="col-6">
+	        		<span>性别：</span>
+	        		<span id="JobhunterData_gender"></span>
+	        	</div>
+	        	<!-- 学历 -->
+	        	<div class="col-6">
+	        		<span>最高学历：</span>
+	        		<span id="JobhunterData_education"></span>
+	        	</div>
+	        </div>
+	        <!-- 第三行 -->
+	        <div class="row py-2">
+	        	<!-- 出生日期 -->
+	        	<div class="col-6">
+	        		<span>出生年月：</span>
+	        		<span id="JobhunterData_birth"></span>
+	        	</div>
+	        	<!-- 工作经验 -->
+	        	<div class="col-6">
+	        		<span>工作经验：</span>
+	        		<span id="JobhunterData_workTime"></span>
+	        	</div>
+	        </div>
+
+	      </div>
+
+	    </div>
+
+	  </div>
+	</div>
+
+</div>

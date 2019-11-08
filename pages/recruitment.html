@@ -1,0 +1,1288 @@
+<style>
+	.recruitment_tip{
+		width: 100%;
+	}
+	.recruitment_tip,
+	.recruitment_label,
+	.recruitment_addBtns{
+		height: 50px;
+		line-height: 50px;
+	}
+	.recruitment_label{
+		width: 170px;
+		float:left;
+		border-top: 3px solid #3366ff;
+		background-color: #fff;
+		color: #000;
+		cursor: pointer;
+	}
+	.recruitment_style1{
+		border-top: 0;
+		border-right:2px solid #f1f1f1; 
+		border-bottom:2px solid #f1f1f1;
+	}
+	.recruitment_style2{
+		border-top: 0;
+		border-left:2px solid #f1f1f1; 
+		border-bottom:2px solid #f1f1f1;
+	}
+	.recruitment_addBtns{
+		float: right;
+		width: 220px;
+	}
+	.btn_release,
+	.btn_releaseAll{
+		width: 100px;
+		height: 30px;
+		line-height: 30px;
+		border-radius: 3px;
+		background-color: #ff6600;
+		margin-top: 10px;
+		margin-left: 10px;
+		box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3490);
+		cursor: pointer;
+	}
+	.btn_releaseAll{
+		background-color: #66a5f3;
+	}
+	.btn_release span,
+	.btn_releaseAll span{
+		font-size: 14px;
+		color: #fff;
+		margin-left: 5px;
+		font-weight: 700;
+		line-height: 30px;
+	}
+	.btn_release img,
+	.btn_releaseAll img{
+		margin-left: 5px;
+	}
+	.recruitmented_tbl_display{
+		display: none;
+	}
+	.recruitment_list{
+		width: 100%;
+		background-color: #fff;
+	}
+	.recruitment_btns select:focus{
+		box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.25);
+	}
+	.input_key{
+		margin-left: 47.6% !important
+	}
+	.input_keyname img{
+		width: 15px;
+		height: 15px;
+		margin-right: 5px
+	}
+	.input_keyname{
+		border: 1px solid #ededed;
+		border-left: 0;
+		line-height: 35px;
+	}
+	.input_keyname input{
+		border: 0;
+		height: 30px;
+		line-height: 38px;
+	}
+	.recruitment_btns,
+	.recruitmenting_content,
+	.recruitmented_content{
+		width: 100%;
+	}
+	.btn_delAll{
+		padding: 5px !important;
+	}
+	.btn:focus{
+		box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.25) !important;
+	}
+	.btn_del,
+	.btn_upd{
+		text-decoration: underline;
+	}
+	.btn_del,
+	.btn_upd{
+		color: #000;
+	}
+	.btn_upd{
+		margin-right: 10px;
+	}
+	table{
+		width: 1058.33px !important;
+		table-layout:fixed;
+	}
+	td{
+		overflow:hidden;
+		width:110px !important;
+		text-overflow:ellipsis !important;
+		white-space:nowrap !important;
+	}
+	#recruitmentModalLabel{
+		color: #000;
+	}
+	#recruitmentModalLabel{
+		font-size: 16px;
+	}
+	div[name=dangerDiv]{
+		height: 14px;
+	}
+	span.dangermsg{
+		color: red;
+		font-size: 14px;
+	}
+	#input_welfare{
+		border: 1px solid #ced4da;
+		border-radius: 2px;
+		line-height: 27px;
+	}
+	.welfare_wrapper{
+		float: left;
+		height: 20px;
+		background-color: #0099cc;
+		color: #fff;
+		font-size: 12px;
+		margin: 5px 0px;
+		margin-left: 10px;
+		padding: 0 3px;
+		line-height: 20px;
+	}
+	.welfare_label a{
+		margin-left: 5px;
+	}
+	.messRecruitment{
+		border: 0;
+		padding-bottom: 0;
+	}
+	.recruitment_title{
+		font-weight: bold;
+		font-size: 20px;
+		color: #000;
+	}
+	.recruitment_title span:last-child{
+		color: #ff6600;
+	}
+	.recruitment_welfare{
+		height: 50px;
+		line-height: 50px;
+		font-size: 12px;
+		border-bottom: 1px solid #ededed;
+	}
+	.business_title{
+		line-height: 23px;
+	}
+	.welfare div{
+		height: 26px;
+		line-height: 26px;
+		float:left;
+		margin-right: 10px;
+		color: #fff;
+		font-weight: 12px;
+		padding: 0 3px;
+	}
+	.welfare div:nth-child(2n-1){
+		background-color: #8080c0;
+	}
+	.welfare div:nth-child(2n){
+		background-color: #0080c0;
+	}
+	.messRecruitment_body{
+		padding-right: 3rem !important;
+		padding-left: 3rem !important;
+	}
+	.recruitment_mess p:first-child{
+		font-weight: bold;
+		color: #000;
+	}
+	
+</style>
+
+<script>
+	var baseURL = "http://203.195.246.58:7777";
+	var tables;//渲染表格的数据
+	var allData;//存放所有招聘信息的变量
+	var businessData;//存放指定公司的数据
+	var recruitmentData;//存放指定招聘信息数据
+
+	// 初始化加载招聘信息数据
+	function loadData(num){
+		// 接口地址
+		var url = baseURL+"/Employment/findAll";
+
+		// 使用ajax方法获取数据
+		$.get(url,function(response){
+			if (response.status == 200) {
+				// 1. 使用全局变量存放数据，方便加载检索选项
+				allData = response.data;
+
+				var finished = [];//已结束
+				var unfinished = [];//未结束
+
+				// 遍历数据，筛选已完结的
+				response.data.forEach(function(item){
+					// 判断是否为已完结
+					if (item.status == "已完结") {
+						finished.push(item);
+					}else{
+						unfinished.push(item);
+					}
+				});
+				
+		    // 3. 使用封装好的函数渲染招聘信息的数据
+		    // 渲染已完结
+				foreachDataFinished(finished);	
+				// 渲染未完结的 
+				foreachDataUnfinished(unfinished);	
+				if (num == 0) {
+					// 初始化加载检索选择数据
+					// num==0初始化
+					loadSelect();
+				}			
+			}else{
+				// 响应状态不成功则显示接口有问题
+				alert("接口异常");
+			}
+		});
+
+	}
+
+	// 为检索加载选择数据
+	function loadSelect(){
+		// 为职位类型检索选择按钮添加选项
+		$("#select_position").empty();
+		$('<option value="0" selected>职位类型</option>').appendTo("#select_position");
+		// 遍历数据
+		allData.forEach(function(item){
+			// 判断选项中是否已经有同样的值了
+			var isJob = false;
+
+			$("#select_position").children().each(function(){
+				if ($(this).val()==item.job) {
+					isJob = true;
+				}
+			});
+			// 没有的时候添加选项
+			if (!isJob) {
+				// 给职位类型添加选项
+				$(`<option value="`+item.job+`">`+item.job+`</option>`).appendTo("#select_position");
+			}
+			
+		});
+	}
+
+	// 封装分页渲染列表数据的函数 未完结
+	function foreachDataUnfinished(data){
+		// 2. 如果已经有数据了先清空再重新加载
+		if ($('#recruitmenting_tbl').hasClass('dataTable')) {
+      		var dttable = $('#recruitmenting_tbl').dataTable();
+      		dttable.fnClearTable(); //清空一下table
+      		dttable.fnDestroy(); //还原初始化了的datatable
+    	}
+
+		// 使用插件datatables渲染数据并分页
+		tables = $('#recruitmenting_tbl').DataTable({
+			"retrieve": true,
+			"ordering":false,//取消默认排序
+			"bLengthChange": false, //开关，是否显示每页显示多少条数据的下拉框
+			'iDisplayLength': 7, //每页初始显示7条记录
+			'bFilter': false,  //是否使用内置的过滤功能（是否去掉搜索框）
+			"bInfo": false, //开关，是否显示表格的一些信息(当前显示XX-XX条数据，共XX条)
+			"bPaginate": true, //开关，是否显示分页器
+			"bSort": false, //是否可排序 
+			"bProcessing" : true, //开启读取服务器数据时显示正在加载中……特别是大数据量的时候，开启此功能比较好
+			"data" :data, 
+			//使用对象数组，一定要配置columns，告诉 DataTables 每列对应的属性
+			//data 这里是固定不变的，name，position，salary，office 为你数据里对应的属性
+			"columns" : [
+				{ 
+					// 定义操作列,
+					targets : 0,//操作按钮目标列
+					data : 'id',
+					"orderable":false,
+					render : function(data, type,row) {
+						var html = '<input class="text-center" type="checkbox" value="'+data+'">';
+						return html;
+					}
+				},
+				{ data: 'title' },
+				{ data: 'contactName' },
+				{ data: 'contactPhone' },
+				{ data: 'job' },
+				{ data: 'publishTime' },
+				{ 
+					// 定义操作列,
+					targets : 5,//操作按钮目标列
+					data : null,
+					render : function(data, type,row) {
+						var html = '<a id="btn_mess" class="btn_mess text-center" href="javascript:void(0)">详情</a>';
+						return html;
+					}
+				},
+				{
+					// 定义操作列,
+					targets : 6,//操作按钮目标列
+					data : null,
+					render : function(data, type,row) {
+						var html = '<a id="btn_upd" class="btn_upd text-center" href="javascript:void(0)">修改</a>';
+						html += '<a id="btn_del" class="btn_del text-center" href="javascript:void(0)">删除</a>';
+						return html;
+					}
+				}
+			]
+		});
+
+	}
+
+	// 封装分页渲染列表数据的函数 已完结
+	function foreachDataFinished(data){
+		// 2. 如果已经有数据了先清空再重新加载
+		if ($('#recruitmented_tbl').hasClass('dataTable')) {
+      		var dttable = $('#recruitmented_tbl').dataTable();
+      		dttable.fnClearTable(); //清空一下table
+      		dttable.fnDestroy(); //还原初始化了的datatable
+    	}
+
+		// 使用插件datatables渲染数据并分页
+		tables = $('#recruitmented_tbl').DataTable({
+			"retrieve": true,
+			"ordering":false,//取消默认排序
+			"bLengthChange": false, //开关，是否显示每页显示多少条数据的下拉框
+			'iDisplayLength': 7, //每页初始显示7条记录
+			'bFilter': false,  //是否使用内置的过滤功能（是否去掉搜索框）
+			"bInfo": false, //开关，是否显示表格的一些信息(当前显示XX-XX条数据，共XX条)
+			"bPaginate": true, //开关，是否显示分页器
+			"bSort": false, //是否可排序 
+			"bProcessing" : true, //开启读取服务器数据时显示正在加载中……特别是大数据量的时候，开启此功能比较好
+			"data" :data, 
+			//使用对象数组，一定要配置columns，告诉 DataTables 每列对应的属性
+			//data 这里是固定不变的，name，position，salary，office 为你数据里对应的属性
+			"columns" : [
+				{ 
+					// 定义操作列,
+					targets : 0,//操作按钮目标列
+					data : 'id',
+					"orderable":false,
+					render : function(data, type,row) {
+						var html = '<input class="text-center" type="checkbox" value="'+data+'">';
+						return html;
+					}
+				},
+				{ data: 'title' },
+				{ data: 'contactName' },
+				{ data: 'contactPhone' },
+				{ data: 'job' },
+				{ data: 'publishTime' },
+				{ 
+					// 定义操作列,
+					targets : 5,//操作按钮目标列
+					data : null,
+					render : function(data, type,row) {
+						var html = '<a id="btn_mess" class="btn_mess text-center" href="javascript:void(0)">详情</a>';
+						return html;
+					}
+				},
+				{
+					// 定义操作列,
+					targets : 6,//操作按钮目标列
+					data : null,
+					render : function(data, type,row) {
+						var html = '<span class="text-center">已完结</span>';
+						return html;
+					}
+				}
+			]
+		});
+
+	}
+
+	// 加载职位表中的数据，以用来发布招聘信息
+	function loadJobData(){
+		// 先清空再添加
+		$("#input_job").empty();
+		$("#input_job").append(`<option value="0" selected>选择工种</option>`);
+		// 使用ajax方法获取工种信息数据
+		$.get(baseURL+"/JobType/findAll",function(response){
+			if (response.status == 200) {
+					// 遍历数据
+					response.data.forEach(function(item){
+						$("#input_job").append(`<option value="`+item.id+`">`+item.name+`</option>`);
+					});
+			}else{
+				// 响应状态不成功则显示接口有问题
+				alert("接口异常");
+			}
+		});
+	}
+
+	// 加载表单中招聘公司的数据，以用来发布信息时选择相应招聘公司
+	function loadBusinessData(){
+		
+		// 使用ajax方法获取公司的信息数据
+		$.get(baseURL+"/Business/findAll",function(response){
+			if (response.status == 200) {
+					// 遍历数据
+					response.data.forEach(function(item){
+						$("#input_businessId").append(`<option value="`+item.id+`">`+item.name+`</option>`);
+					});
+			}else{
+				// 响应状态不成功则显示接口有问题
+				alert("接口异常");
+			}
+		});
+	}
+
+	// 加载表单中福利选项信息
+	function loadWelfareData(){
+		// 先清空
+		$("#input_welfare").empty();
+		$(".welfare_label").empty();
+		$(".welfare_label").append("您可以选择:");
+
+		// 使用ajax方法获取福利的信息数据
+		$.get(baseURL+"/Welfare/findAll",function(response){
+			if (response.status == 200) {
+					// 遍历数据
+					response.data.forEach(function(item){
+						if (item.status == "使用中") {
+							// 如果这个福利是使用中的状态就添加
+							$(".welfare_label").append(`<a href="javascript:void(0)" value="`+item.name+`">`+item.name+`</a>`);
+						}
+					});
+			}else{
+				// 响应状态不成功则显示接口有问题
+				alert("接口异常");
+			}
+		});
+	}
+
+	// 加载工作省份地点选项信息
+	function loadProvince(){
+		// 先清空再添加
+		$("#input_province").empty();
+		$("#input_province").append(`<option value="0" selected>请选择省份</option>`);
+		// 使用ajax方法获取省份信息数据
+		$.get(baseURL+"/Province/findAll",function(response){
+			if (response.status == 200) {
+					// 遍历数据
+					response.data.forEach(function(item){
+						$("#input_province").append(`<option value="`+item.id+`">`+item.name+`</option>`);
+					});
+			}else{
+				// 响应状态不成功则显示接口有问题
+				alert("接口异常");
+			}
+		});
+	}
+
+	// 根据id删除数据
+	function deleteByid(id){
+		var url = baseURL+"/Employment/deleteById";
+		// 4.get请求方式的数据必须为对象传递
+		var data = {id:id};
+		// 5.调用jQuery的ajax方法删除一条记录并初始化数据
+		$.post(url,data,function(response){	
+			// 重载数据
+			loadData(0);
+		});
+	}
+
+	// 根据id查询公司数据
+	function selectBybusinessId(id){
+		var url = "/Business/findById";
+		// 4.get请求方式的数据必须为对象传递
+		var data = {id:id};
+		// 5.调用jQuery的ajax方法删除一条记录并初始化数据
+		$.ajaxSettings.async = false;//同步请求
+		$.get(baseURL+url,data,function(response){
+			businessData = response.data;
+		});
+	}
+
+	// 根据id查询招聘数据
+	function selectByid(id,idName){
+		var url = "/Employment/findById";
+		// 4.get请求方式的数据必须为对象传递
+		var data = {id:id};
+		// 5.调用jQuery的ajax方法删除一条记录并初始化数据
+		$.ajaxSettings.async = false;
+		$.get(baseURL+url,data,function(response){
+			// 如果是查看详情请求数据 2为查看详情
+			if (idName == 2) {
+				$("#recruitment_title").text(response.data.title);//招聘标题
+				$("#recruitment_salary").text(response.data.salary);//工资
+				$("#recruitment_num").text(response.data.num);//人数
+				// 省份城市
+				var local = response.data.province;
+				local += "-"+response.data.city;
+				$("#recruitment_address").text(local);//地址
+				// 福利
+				var w = (response.data.welfare).split(" ");
+				$("#recruitment_welfare").empty();//先清空原有的数据
+				w.forEach(function(item){
+					$("#recruitment_welfare").append(`<div>`+item+`</div>`);
+				});
+				// 查询公司名称
+				selectBybusinessId(response.data.businessId)
+				$("#business_title").text(businessData.name);//公司名称
+				$("#recruitment_mess").text(response.data.description);//详细信息
+			}else if (idName == 1) {
+				// 修改数据
+				$("#recruitment_updModal input[name=id]").attr("value",id);// id
+    		$("input#input_title").val(response.data.title);//招聘标题
+    		$("select#input_jobname").val(response.data.jobId);//职位id
+    		$("#input_jobname").children("option").each(function(){
+    			// 判断职位选择
+    			if ($(this).val() == response.data.job) {
+    				$(this).attr("selected",true);
+    			}
+    		});
+    		$("input#input_num").val(response.data.num);//招聘人数
+    		$("#input_businessId").children("option").each(function(){
+    			// 判断招聘公司选择
+    			if ($(this).val() == response.data.businessId) {
+    				$(this).attr("selected",true);
+    			}
+    		});
+    		$("input#input_salary").val(response.data.salary);//薪资水平
+    		$("#input_province").children("option").each(function(){
+    			// 判断省份选择
+    			if ($(this).text() == response.data.province) {
+    				$(this).attr("selected",true);
+    			}
+    		});
+    		$("#input_city").children("option").each(function(){
+    			// 判断城市选择
+    			if ($(this).val() == response.data.city) {
+    				$(this).attr("selected",true);
+    			}
+    		});
+    		$("#input_workingHours").val(response.data.workingHours);//工作时间
+    		$("#input_contactName").val(response.data.contactName);//联系人姓名
+    		$("input#input_contactPhone").val(response.data.contactPhone);//联系方式
+    		// 福利
+    		var welfare = (response.data.welfare).split(" ");
+    		$("#input_welfare").empty();//先清空原有的数据
+				welfare.forEach(function(item){
+					$("#input_welfare").append(`<div class="welfare_wrapper" value="`+item+`">
+											`+item+` <img src="./images/u1129.png">
+										</div>`);
+				});
+    		$("#input_description").val(response.data.description);//详细描述
+	    	recruitmentData = response.data;
+			}
+		});
+	}
+
+	$(function(){
+		// 初始化加载招聘数据
+		loadData(0);
+
+		// 为招聘中标题绑定事件显示不同的表格数据
+		$("#recruiting").click(function(){
+			// 招聘中
+			$("#recruiting").toggleClass("recruitment_style1");
+			$("#recruited").toggleClass("recruitment_style2");
+
+			// 招聘中显示
+			$(".recruitmenting_content").removeClass("recruitmented_tbl_display");
+			// 完结中隐藏
+			$(".recruitmented_content").addClass("recruitmented_tbl_display");
+		});
+		// 为招聘完结标题绑定事件显示不同的表格数据
+		$("#recruited").click(function(){
+			// 招聘完结
+			$("#recruiting").toggleClass("recruitment_style1");
+			$("#recruited").toggleClass("recruitment_style2");
+
+			// 完结显示
+			$(".recruitmented_content").removeClass("recruitmented_tbl_display");
+			// 招聘中隐藏
+			$(".recruitmenting_content").addClass("recruitmented_tbl_display");
+		});
+
+		// 1.为招聘中单个删除、修改、详情按钮绑定事件
+		$("#recruitmenting_tbl,#recruitmented_tbl").on("click","a",function(){
+			// 2.获取需要删除的id
+			var id = $(this).parents("tr").find("input").val();
+			switch(this.id){
+				case "btn_del":
+					// 为删除按钮绑定事件
+					
+					// 调用删除函数删除
+					deleteByid(id);
+					alert("删除成功");
+					break;
+				case "btn_upd":
+					// 显示模态框前加载这些数据
+					// 加载工种信息选项
+					loadJobData();
+					// 加载招聘公司信息选项
+					loadBusinessData();
+					// 加载福利信息选项
+					loadWelfareData();
+					// 加载工作地点信息选项
+					loadProvince();
+					// 1. 查询获取数据放到模态框中
+					selectByid(id,1);
+					// 2. 将对应模态框的内容显示
+					$("#recruitment_updModal").css("display","block");
+					$("#recruitment_messModal").css("display","none");
+					// 3. 显示模态框
+					$("#recruitmentModal").modal("show");
+					break;
+				case "btn_mess":
+					// 1. 查询获取数据放到模态框中
+					selectByid(id,2);
+					
+					// 2. 将对应模态框的内容显示
+					$("#recruitment_messModal").css("display","block");
+					$("#recruitment_updModal").css("display","none");
+					// 3. 显示模态框
+					$("#recruitmentModal").modal("show"); 
+					break;
+			}
+			event.preventDefault();
+		});
+
+		// 2. 为两个批量删除按钮绑定事件
+		// 未结束
+		$("button#btn_delAll_unfinished").click(function(){
+			$("#recruitmenting_tbl>tbody input[type=checkbox]:checked").map(function(index,item){
+			 	deleteByid($(item).val());
+			}).toArray();
+
+			alert("删除成功");
+
+		});
+
+		// 已结束
+		$("button#btn_delAll_finished").click(function(){
+			$("#recruitmented_tbl>tbody input[type=checkbox]:checked").map(function(index,item){
+			 	deleteByid($(item).val());
+			}).toArray();
+			alert("删除成功");
+
+		});
+
+		// 3. 为单个发布职位按钮绑定事件
+		$("#btn_release").click(function(){
+			// 显示模态框前加载这些数据
+			// 加载工种信息选项
+			loadJobData();
+			// 加载招聘公司信息选项
+			loadBusinessData();
+			// 加载福利信息选项
+			loadWelfareData();
+			// 加载工作地点信息选项
+			loadProvince();
+			// 2. 将对应模态框的内容显示
+			$("#recruitment_updModal").css("display","block");
+			$("#recruitment_messModal").css("display","none");
+			// 3. 显示模态框
+			$("#recruitmentModal").modal("show");
+		})
+
+		// 监听模态框的显示，加载表单选项信息
+		$('#recruitmentModal').on('show.bs.modal', function (e) {
+			
+		});
+
+		// 4.监听模态框的关闭清除表单中的数据
+		$('#recruitmentModal').on('hidden.bs.modal', function (e) {
+			$(this).find("form")[0].reset();
+			// 清除表单的id值
+			$("input[name=id]").val("");
+			// 清除表单中的错误信息
+			$("[name=dangerDiv]").children().remove();
+			// 清空显示信息中的福利的显示元素
+			$("#recruitment_welfare").empty();
+		});
+
+		// 5. 为保存按钮绑定事件
+		$("#recruitment_commit").click(function(){
+			//1. 获取输入框的值
+	   	var id = $("#recruitment_updModal input[name=id]").val();// id
+    	var title = $("input#input_title").val();//招聘标题
+    	var jobId = $("select#input_jobname").val();//职位id
+    	var job = $("select#input_jobname option:selected").text();//职位
+    	var num = $("input#input_num").val();//招聘人数
+    	var businessId = $("select#input_businessId").val();//招聘公司
+    	var salary = $("input#input_salary").val();//薪资水平
+    	var province = $("select#input_province option:selected").text();//省份
+    	var city = $("select#input_city").val();//城市
+    	var workingHours = $("#input_workingHours").val();//工作时间
+    	var contactName = $("#input_contactName").val();//联系人姓名
+    	var contactPhone = $("input#input_contactPhone").val();//联系方式
+    	// 获取福利
+    	var welfare = "";
+    	$("#input_welfare").children().each(function(){
+    		// 将福利用空格拼接起来
+    		welfare += $(this).attr("value");//获取被选中的福利
+    		welfare += " ";
+    	});
+
+    	var startTime = Date.parse($("input#input_startTime").val());//开始日期
+    	// var t = Date.parse(time)
+    	var endTime = Date.parse($("input#input_endTime").val());//结束日期
+    	var description = $("#input_description").val();//详细描述
+
+    	var data;
+    	if (id) {
+    		// 修改时如果职位id为0则使用原来数据的信息
+    		if (jobId == 0) {
+    			jobId = recruitmentData.jobId;
+    			job = recruitmentData.job;
+    		}
+    		if (businessId == 0) {
+    			businessId = recruitmentData.businessId;
+    		}
+    		if (city == 0) {
+    			city = recruitmentData.city;
+    		}
+    		
+    		// 有id  修改(待完善)
+    		data = {
+    			id : id,
+    			businessId : businessId,
+    			city : city,
+    			province : province,
+    			jobId : jobId,
+    			/*startTime : startTime,
+    			endTime : endTime,*/
+    			workingHours : workingHours,
+    			contactName : contactName,
+    			contactPhone : contactPhone,
+    			description : description,
+    			job : job,
+    			salary : salary,
+    			status : recruitmentData.status,
+    			auditStatus : recruitmentData.auditStatus,
+    			title : title,
+    			welfare : welfare,
+    			num : num
+    		};
+    	}else{
+    		// 没有id 保存
+    		data = {
+    			businessId : businessId,
+    			city : city,
+    			province : province,
+    			jobId : jobId,
+    			/*startTime : startTime,
+    			endTime : endTime,*/
+    			workingHours : workingHours,
+    			contactName : contactName,
+    			contactPhone : contactPhone,
+    			description : description,
+    			job : job,
+    			salary : salary,
+    			status : "未开始",
+    			auditStatus : "未审核",
+    			title : title,
+    			welfare : welfare,
+    			num : num
+    		}
+    	}
+    	// 提交数据
+			$.post(baseURL+"/Employment/saveOrUpdate",data,function(result){
+				if (result.status === 200) {
+					// 添加/修改成功 隐藏模态框
+    			$("#recruitmentModal").modal("hide");
+    			// 重载数据
+    			loadData(0);
+    			// 显示成功的信息
+    			alert("更新成功");
+				}else{
+					alert(result.status);
+				}		
+			});
+			event.preventDefault();
+		})
+
+		// 6. 为表单的职业选项框绑定级联事件
+		$('#input_job').change(function() {
+			// 获取当前被选中的选项值
+		  var jobTypeId = $(this).val();
+		  if (jobTypeId != 0) {
+		  	// 当选择了应有的选项之后执行查找数据
+		  	// 查询相应的职位数据
+				$.get(baseURL+"/Jobs/findAll",function(result){
+					if (result.status === 200) {
+						// 先清空其原有的相应数据
+						$("#input_jobname").empty();
+						$("#input_jobname").append(`<option value="0" selected>选择职位</option>`);
+						// 遍历获取到的数据
+						result.data.forEach(function(item){
+							if (item.jobTypeId == jobTypeId) {
+								// 如果工种都相同则添加
+								// 将职位数据放到职位的选项中
+								$("#input_jobname").append(`<option value="`+item.id+`">`+item.name+`</option>`);
+							}
+							
+						});
+						
+					}else{
+						alert("接口异常");
+					}		
+				});
+		  }else{
+		  	// 先清空其原有的相应数据
+				$("#input_jobname").empty();
+				$("#input_jobname").append(`<option value="0" selected>选择职位</option>`);
+		  }
+		});
+
+		// 7. 为表单的福利选项监控绑定事件
+		$(".welfare_label").on("click","a",function(){
+			// 获取当前点击的a标签的属性
+			var value = $(this).attr("value");
+			// console.log(value);
+			// 获取框中的标签一一判断是否已经存在，存在就不添加了
+			var isWelfare =  false;
+			// 先判断这个标签是否已经存在
+			$("#input_welfare").children().each(function(){
+				if ($(this).attr("value")==value) {
+					isWelfare = true;
+				}
+			});
+			// 该标签不存在，添加该标签达到去重效果
+			if (!isWelfare) {
+				$("#input_welfare").append(`<div class="welfare_wrapper" value="`+value+`">
+											`+value+` <img src="./images/u1129.png">
+										</div>`);
+			}else{
+				// 弹框表示标签已经存在
+				alert("标签已经存在");
+			}
+			event.preventDefault();
+		});
+
+		// 8. 为表单的福利选项绑定取消事件
+		$("#input_welfare").on("click","img",function(){
+			// 找到当前该图标的父元素，移除整个元素
+			$(this).parent().remove();
+		});
+
+		// 9. 为表单的省市选项框绑定级联事件
+		$('#input_province').change(function() {
+			// 获取当前被选中的选项值
+		  var provinceId = $(this).val();
+		  if (provinceId != 0) {
+		  	// 当选择了应有的选项之后执行查找数据
+		  	// 查询相应的城市数据
+				$.get(baseURL+"/City/findAll",function(result){
+					if (result.status === 200) {
+						// 先清空其原有的相应数据
+						$("#input_city").empty();
+						$("#input_city").append(`<option value="0" selected>请选择城市</option>`);
+						// 遍历获取到的数据
+						result.data.forEach(function(item){
+							if (item.provinceId == provinceId) {
+								// 当省份与城市的记录相等时才可添加
+								// 将职位数据放到职位的选项中
+								$("#input_city").append(`<option value="`+item.name+`">`+item.name+`</option>`);
+							}
+						});
+					}else{
+						alert("接口异常");
+					}		
+				});
+		  }else{
+		  	// 先清空其原有的相应数据
+			$("#input_city").empty();
+			$("#input_city").append(`<option value="0" selected>请选择城市</option>`);
+		  }
+		});
+
+		// 10. 为职位检索选项框绑定事件
+		$('#select_position').change(function() {
+		  var value = $(this).val();
+		  if (value != 0) {
+		  	// 当选择了应有的选项之后执行查找数据
+		  	var data = {job:value};
+		  	// 筛选相应数据
+				$.get(baseURL+"/Employment/findByJob",data,function(result){
+					if (result.status === 200) {
+						var finished = [];//已结束
+						var unfinished = [];//未结束
+						if ($(".recruitmenting_content").css("display") == "block") {
+							// 如果当前显示的是未结束的
+							result.data.forEach(function(item){
+								// 判断是否为已完结
+								if (item.status != "已完结") {
+									unfinished.push(item);
+								}
+							});
+							// 渲染未完结的 
+							foreachDataUnfinished(unfinished);
+						}else if ($(".recruitmented_content").css("display") == "block") {
+							// 如果当前显示的是已结束的
+							result.data.forEach(function(item){
+								// 判断是否为已完结
+								if (item.status == "已完结") {
+									finished.push(item);
+								}
+							});
+							// 渲染已完结
+							foreachDataFinished(finished);
+						}
+							// alert("筛选成功");
+					}else{
+						alert("接口异常");
+						// addAlert("alert-danger","接口异常!");
+					}		
+				});
+		  }else{
+		  	// 如果选中的是没有的选项则显示全部数据
+		  	loadData(0);
+		  }
+		});
+
+
+	});
+
+</script>
+
+<div class="recruitment">
+	<!-- 选项卡 -->
+
+	<!-- 标题 -->
+	<div class="recruitment_tip">
+		<div id="recruiting" class="recruitment_label text-center">
+			招聘中
+		</div>
+		<div id="recruited" class="recruitment_label text-center recruitment_style2">
+			招聘完结
+		</div>
+		<!-- 添加按钮 -->
+		<div class="recruitment_addBtns">
+			<div id="btn_release" class="btn_release float-left">
+				<img src="./images/u148.png">
+				<span>发布职位</span>
+			</div>
+			<div class="btn_releaseAll float-right">
+				<img src="./images/u148.png">
+				<span>导入职位</span>
+			</div>
+		</div>
+	</div>
+	
+
+	<!-- 内容 -->
+	<div class="recruitment_list">
+		
+		<!-- 检索按钮-->
+		<div class="recruitment_btns row py-3">
+			<!-- 职位类型 -->
+			<div class="input-group col-2 ml-4">
+				<select id="select_position" class="custom-select select_position" >
+				    <option value="0" selected>职位类型</option>
+				</select>
+			</div>
+
+			<!-- 关键字 -->
+			<div class="input-group col-4 input_key">
+				<select class="custom-select select_title float-left" width="20%">
+				    <option value="标题" selected>标题</option>
+				</select>
+				<div class="float-left input_keyname"><input id="" type="text" name=""><img src="./images/u138.png"></div>
+				
+			</div>
+		</div>
+
+		<!-- 招聘中列表内容 -->
+		<div class="recruitmenting_content">
+			<!-- 招聘中 -->
+			<table id="recruitmenting_tbl" class="table table-striped">
+			  <thead>
+			    <tr>
+			      <th width="50px">#</th>
+			      <th>招聘标题</th>
+			      <th>发布人</th>
+			      <th>联系方式</th>
+			      <th>职位</th>
+			      <th>发布时间</th>
+			      <th>详情</th>
+			      <th>操作</th>
+			    </tr>
+			  </thead>
+			</table>
+
+			<div class="btn_delAll"><button id="btn_delAll_unfinished" type="button" class="btn btn-danger btn_allDel">批量删除</button></div>
+		</div>
+
+		<!-- 招聘中列表内容 -->
+		<div class="recruitmented_content recruitmented_tbl_display">
+			<!-- 招聘完结 -->
+			<table id="recruitmented_tbl" class="table table-striped">
+			  <thead>
+			    <tr>
+			      <th width="50px">#</th>
+			      <th>招聘标题</th>
+			      <th>发布人</th>
+			      <th>联系方式</th>
+			      <th>职位</th>
+			      <th>发布时间</th>
+			      <th>详情</th>
+			      <th>状态</th>
+			    </tr>
+			  </thead>
+			</table>
+
+			<div class="btn_delAll"><button id="btn_delAll_finished" type="button" class="btn btn-danger btn_allDel">批量删除</button></div>
+		</div>
+
+	</div>
+
+	<!-- Modal模态框 -->
+	<div class="modal fade" id="recruitmentModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-lg" role="document">
+
+	    <!-- 发布和修改招聘信息 -->
+	    <div id="recruitment_updModal" class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="recruitmentModalLabel">发布/修改招聘信息</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	      	<!-- 表单 -->
+					<form>
+						<!-- 存放信息id的 -->
+						<input type="hidden" name="id" value="">
+						<!-- 第一行 -->
+						<div class="form-group row">
+							<!-- 招聘标题 -->
+							<div class="col">
+								<div class="row">
+									<label for="input_title" class="col-2 text-center pr-0"><span class="dangermsg">* </span>招聘标题</label>
+									<div class="col-10 pl-0">
+										<input id="input_title" class="form-control form-control-sm" type="text">
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+						</div>
+						<!-- 第二行 -->
+						<div class="form-group row">
+							<!-- 工种 -->
+							<div class="col-6">
+								<div class="row">							
+									<label for="input_job" class="col-4 text-center pr-0"><span class="dangermsg">* </span>选择工种</label>
+									<div class="col-8 pl-0">
+										<select id="input_job" class="form-control float-left" style="width: 50%">
+											<option value="0" selected>选择工种</option>
+										</select>
+										<select id="input_jobname" class="form-control float-left" style="width: 50%">
+											<option value="0" selected>选择职位</option>
+										</select>
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+							<!-- 招聘人数 -->
+							<div class="col-6 pr-5">
+								<div class="row">
+									<label for="input_num" class="col-4 text-center pr-0"><span class="dangermsg">* </span>招聘人数</label>
+									<div class="col-8 pl-0">
+										<input id="input_num" class="form-control form-control-sm" type="text">
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+						</div>
+
+						<!-- 第三行 -->
+						<div class="form-group row">
+							<!-- 招聘公司 -->
+							<div class="col-6">
+								<div class="row">
+									<label for="input_businessId" class="col-4 text-center pr-0"><span class="dangermsg">* </span>招聘公司</label>
+									<div class="col-8 pl-0">
+										<select id="input_businessId" class="form-control">
+											<option value="0" selected>请选择招聘公司</option>
+										</select>
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+							
+							<!-- 薪资水平 -->
+							<div class="col-6 pr-5">
+								<div class="row">							
+									<label for="input_salary" class="col-4 text-center pr-0"><span class="dangermsg">* </span>薪资水平</label>
+									<div class="col-8 pl-0">
+										<input id="input_salary" class="form-control form-control-sm" type="text">
+										</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+							
+						</div>
+
+						<!-- 第四行 -->
+						<div class="form-group row">
+							<!-- 工作地点 -->
+							<div class="col-6">
+								<div class="row">
+									<label for="input_province" class="col-4 text-center pr-0"><span class="dangermsg">* </span>工作地点</label>
+									<div class="col-8 pl-0">
+										<select id="input_province" class="form-control float-left" style="width: 50%">
+											<option value="0" selected>请选择省份</option>
+										</select>
+										<select id="input_city" class="form-control float-left" style="width: 50%">
+											<option value="0" selected>请选择城市</option>
+										</select>
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+							
+							<!-- 工作时间 -->
+							<div class="col-6 pr-5">
+								<div class="row">							
+									<label for="input_workingHours" class="col-4 text-center pr-0"><span class="dangermsg">* </span>工作时间</label>
+									<div class="col-8 pl-0">
+										<input id="input_workingHours" class="form-control form-control-sm" type="text">
+										</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+							
+						</div>
+
+						<!-- 第五行 -->
+						<div class="form-group row">
+							<!-- 联系人姓名 -->
+							<div class="col-6">
+								<div class="row">
+									<label for="input_contactName" class="col-4 text-center pr-0"><span class="dangermsg">* </span>联系人姓名</label>
+									<div class="col-8 pl-0">
+										<input id="input_contactName" class="form-control form-control-sm" type="text">
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+							
+							<!-- 联系方式 -->
+							<div class="col-6 pr-5">
+								<div class="row">							
+									<label for="input_contactPhone" class="col-4 text-center pr-0"><span class="dangermsg">* </span>联系方式</label>
+									<div class="col-8 pl-0">
+										<input id="input_contactPhone" class="form-control form-control-sm" type="text">
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+							
+						</div>
+
+						<!-- 第六行 -->
+						<div class="form-group row">
+							<!-- 岗位福利 -->
+							<div class="col">
+								<div class="row">
+									<label for="input_welfare" class="col-2 text-center pr-0"><span class="dangermsg">* </span>岗位福利</label>
+									<div id="input_welfare" class="col-9 pl-0">
+										
+									</div>
+								</div>
+								<div class="welfare_label ml-5 pl-5 pr-0">
+									您可以选择:
+								</div>
+							</div>
+						</div>
+
+						<!-- 第七行 -->
+						<div class="form-group row">
+							<!-- 开始日期 -->
+							<div class="col-6">
+								<div class="row">
+									<label for="input_startTime" class="col-4 text-center pr-0"><span class="dangermsg">* </span>开始日期</label>
+									<div class="col-8 pl-0">
+										<input id="input_startTime" class="form-control form-control-sm" type="date">
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+							
+							<!-- 结束日期 -->
+							<div class="col-6 pr-5">
+								<div class="row">							
+									<label for="input_endTime" class="col-4 text-center pr-0"><span class="dangermsg">* </span>结束日期</label>
+									<div class="col-8 pl-0">
+										<input id="input_endTime" class="form-control form-control-sm" type="date">
+									</div>
+								</div>
+								<div name="dangerDiv" class="px-0 text-right"></div>
+							</div>
+							
+						</div>
+
+						<!-- 第八行 详细描述-->
+						<div class="form-group row">
+							<!-- 详细描述 -->
+							<label for="input_description" class="col-2 text-center pr-0"><span class="dangermsg">* </span>详细描述</label>
+							<div class="col-8 pl-0">
+								<textarea id="input_description" class="form-control form-control-sm" ></textarea>
+							</div>
+							<div name="dangerDiv" class="col-10 text-right"></div>
+						</div>
+
+					</form>
+	      	<!-- 表单结束 -->
+	      </div>
+	      <div class="modal-footer">
+	        <button id="close" type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+	        <button id="recruitment_commit" type="button" class="btn btn-primary">保存</button>
+	      </div>
+	    </div>
+
+	    <!-- 查看招聘详情信息 -->
+	    <div id="recruitment_messModal" class="modal-content" style="display: none;">
+
+	      <div class="modal-header messRecruitment">
+	        <h5 class="modal-title" id="exampleModalLabel"></h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+
+	      <div class="modal-body messRecruitment_body">
+			
+					<!-- 第一行标题 -->
+					<div class="py-2 recruitment_title">
+						<span id="recruitment_title"></span>
+						<span id="recruitment_salary" class="float-right"></span>
+					</div>
+					<!-- 第二行招几人 -->
+					<div class="py-2 recruitment_num">
+						<span>招</span>
+						<span id="recruitment_num"></span>
+						<span>人</span>
+					</div>
+					<!-- 第三行招聘地址 -->
+					<div class="py-2 recruitment_address">
+						<img src="./images/u875.png" class="mr-1">
+						<span id="recruitment_address"></span>
+					</div>
+					<!-- 第四行福利 -->
+					<div class="py-2 recruitment_welfare">
+						<div id="recruitment_welfare" class="welfare float-left">
+							
+						</div>
+						<div id="business_title" class="business_title float-right">
+						</div>
+					</div>
+					<!-- 第五行详细招聘信息 -->
+					<div class="py-2 recruitment_mess">
+						<p><span>职位描述</span></p>
+						<p id="recruitment_mess"></p>
+					</div>
+
+	      </div>
+	    </div>
+
+	  </div>
+	</div>
+</div>

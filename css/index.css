@@ -1,0 +1,92 @@
+body{
+	font-family: '微软雅黑';
+	font-weight: 402;
+	font-style: normal;
+	font-size: 14px;
+	color: #666666;
+}
+a:hover{
+	text-decoration: none;
+}
+/*外框架*/
+.wrapper{
+	position: absolute;
+	width: 100%;
+	top:0;
+	bottom: 0;
+}
+
+/*左侧栏*/
+
+.left{
+	height: 100%;
+	background-color: #1c2a36;
+}
+/*头部logo*/
+.left .top_logo{
+	overflow-x: hidden;
+}
+
+/*列表*/
+.left_ul>li{
+	padding: 14px 4px;
+	border-left: 4px solid #1c2a36;
+}
+.left_ul li.active,
+.left_ul>li:hover{
+	background-color: #505563;
+}
+.left_ul>li a{
+	margin-left: 20px;
+	font-size: 16px;
+}
+.left_ul>li a{
+	margin-left: 20px;
+}
+.left_ul>li a,
+.left_ul>li .iconfont{
+	color: #fff;
+}
+.left_ul>li .iconfont{
+	margin-left: 40px;
+	font-size: 18px;
+}
+
+.left_ul li.active{
+	border-left: 4px solid #ff6600;
+}
+/*左侧栏结束
+
+
+/*右侧栏*/
+.right,.right_wrapper{
+	background-color: #f1f1f1;
+}
+
+/*头部登录信息栏*/
+.right_top{
+	height: 55px;
+	background-color: #fff;
+	box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.349);
+	margin-bottom: 7px;
+}
+
+/*主体内容*/
+.right_wrapper{
+	width: 100%;
+	height: 86%;
+	padding: 15px 40px 10px;
+}
+
+.right_wrapper .right_content{
+	width: 100%;
+	height: 100%;
+	/*background-color: #fff;*/
+}
+
+/*脚部信息*/
+.right .footer{
+	font-size: 12px;
+	color: #797c80;
+}
+/*右侧栏结束*/
