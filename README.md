@@ -6,7 +6,7 @@
 - JavaScript
 - jQuery
 - BootStrap
-  iconfont
+- iconfont
 ## pc端图片预览
 #### 商家管理
 ![商家管理](https://github.com/llhlilihuan/JustForYou/blob/master/src/business.png)
